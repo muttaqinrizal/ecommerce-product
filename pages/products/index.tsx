@@ -14,7 +14,17 @@ import { getPagination, Pagination as PaginationType } from "@/lib/pagination"
 import { getCategories, getBrands, priceOptions, Option } from "@/lib/filter"
 import { getQueryUrl } from "@/utils/urlParser"
 import { formatNumberToUSD } from "@/utils/common"
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+} from "chart.js"
+import { Bar } from "react-chartjs-2"
 import Image from "next/image"
+import { countItemsPerBrand, getBrandsLabel } from "@/lib/chart"
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   let page = parseInt(getQueryUrl("page", context) ?? "1")
@@ -37,6 +47,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const categories = await getCategories()
   const brands = getBrands(data.allProducts)
+
+  const label = getBrandsLabel(brands)
+  const chartLabels = label.slice(0, 9);
+  const itemsPerBrand = countItemsPerBrand(brands, data.allProducts)
+  const getTop10Brand = itemsPerBrand.slice(0, 9);
 
   if (category || brand || name || minPrice || maxPrice) {
     data = filterProductsByQuery({
@@ -67,9 +82,30 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       pagination,
       categories,
       brands,
+      chartLabels,
+      getTop10Brand,
     }
   }
 }
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+)
+
+const options = {
+  indexAxis: 'y' as const,
+  responsive: true,
+  plugins: {
+    legend: {
+      position: "top" as const
+    },
+  },
+}
+
 
 type Props = {
   data: GetProductsResponse
@@ -77,10 +113,20 @@ type Props = {
   categories: Option[]
   brands: Option[]
   chartLabels: string[]
-  itemsPerBrand: number[]
+  getTop10Brand: number[]
 }
 
-export default function ProductListPage({ data, pagination, categories, brands, chartLabels, itemsPerBrand }: Props) {
+export default function ProductListPage({ data, pagination, categories, brands, chartLabels, getTop10Brand }: Props) {
+  const chartData = {
+    labels: chartLabels,
+    datasets: [
+      {
+        label: "Total items",
+        data: getTop10Brand,
+        backgroundColor: "#4334eb",
+      }
+    ],
+  }
   const tableHeaders: TableHeader[] = [
     { title: "No" },
     { title: "Images" },
@@ -125,6 +171,10 @@ export default function ProductListPage({ data, pagination, categories, brands, 
       <BottomNavBar />
       <ContentContainer>
         <h2 className="text-gray-700 text-2xl font-semibold pl-2 mb-3">Products</h2>
+        <div className="mt-5 max-w-5xl">
+          <h2 className="text-gray-700 font-semibold pl-2">Items per Brand</h2>
+          <Bar options={options} data={chartData} height={200} />
+        </div>
         <h2 className="text-gray-700 font-semibold pl-2 mb-3">Filters</h2>
         <div className="w-full bg-transparent p-3 mb-5  rounded-lg flex flex-col md:flex-row">
           <div className="flex flex-auto flex-col md:flex-row">
@@ -175,6 +225,7 @@ export default function ProductListPage({ data, pagination, categories, brands, 
           countItems={data.products.length}
         />
         <Pagination pagination={pagination} />
+
       </ContentContainer>
     </PageContainer>
   )
