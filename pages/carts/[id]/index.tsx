@@ -102,20 +102,12 @@ export default function CartDetailPage({ id, data, pagination, user }: Props) {
                 <div className="px-2 py-2">: {user.firstName} {user.lastName}</div>
               </div>
               <div className="grid grid-cols-2">
-                <div className="px-2 py-2 font-semibold">Gender</div>
-                <div className="px-2 py-2">: {user.gender}</div>
-              </div>
-              <div className="grid grid-cols-2">
-                <div className="px-2 py-2 font-semibold">Birthday</div>
-                <div className="px-2 py-2">: {dayjs(user.birthDate).format("D MMM YYYY")}</div>
+                <div className="px-2 py-2 font-semibold"># of items</div>
+                <div className="px-2 py-2">: {data.totalQuantity}</div>
               </div>
               <div className="grid grid-cols-2">
                 <div className="px-2 py-2 font-semibold">Phone</div>
                 <div className="px-2 py-2">: {user.phone}</div>
-              </div>
-              <div className="grid grid-cols-2">
-                <div className="px-2 py-2 font-semibold"># of items</div>
-                <div className="px-2 py-2">: {data.totalQuantity}</div>
               </div>
               <div className="grid grid-cols-2">
                 <div className="px-2 py-2 font-semibold">Total Amount</div>
