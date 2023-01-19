@@ -12,4 +12,8 @@ export const navigationList: NavigationItem[] = [
     title: "Carts",
     href: "/carts",
   },
+  {
+    title: "Source Code",
+    href: "/source",
+  },
 ]
